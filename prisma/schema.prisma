@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum OtpChannel {
+  EMAIL
+  SMS
+}
+
+// A user signs in with an email, a phone, or either. At least one is required (enforced in the app).
+// Phones are stored as +989xxxxxxxxx and emails in lowercase; see src/lib/auth/identifier.ts.
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String?   @unique
+  phone           String?   @unique
+  passwordHash    String?
+  role            Role      @default(STUDENT)
+  emailVerifiedAt DateTime?
+  phoneVerifiedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  sessions Session[]
+}
+
+// Only a hash of the token is stored, so a database leak doesn't expose live sessions.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model OtpCode {
+  id         String     @id @default(cuid())
+  channel    OtpChannel
+  target     String
+  codeHash   String
+  attempts   Int        @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+
+  @@index([target, createdAt])
+}
+
+// Failed sign-in counter per identifier.
+model AuthThrottle {
+  key             String   @id
+  failures        Int      @default(0)
+  windowStartedAt DateTime @default(now())
+}

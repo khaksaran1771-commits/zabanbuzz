@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+/* The theme comes from data-theme on <html>, set by the script in layout.tsx. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Brand overrides on top of HeroUI's theme variables. */
+:root {
+  --background: #fbfaf7;
+  --accent: #fbbf24;
+  --accent-foreground: #1a1400;
+  --link: #8a5a00;
+  --correct: #15803d;
+}
+
+:root[data-theme="dark"] {
+  --background: #0e0f12;
+  --surface: #16181d;
+  --accent: #fbbf24;
+  --accent-foreground: #1a1400;
+  --link: #fbbf24;
+  --correct: #4ade80;
+}
+
+@theme inline {
+  --color-correct: var(--correct);
+  --font-sans: "Vazirmatn Variable", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+.dot-grid {
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
